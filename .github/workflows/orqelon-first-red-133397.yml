@@ -1,0 +1,29 @@
+name: ORQELON First Red 133397
+
+on:
+  push:
+    branches:
+      - orqelon/133397-first-red
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  first-red:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout frozen branch
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: yarn install --immutable
+      - name: Run focused First Red
+        run: yarn jest packages/grafana-o11y-ds-frontend/src/TraceToLogs/TraceToLogsSettings.test.tsx --runInBand
