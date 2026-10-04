@@ -31,6 +31,8 @@ export interface TraceToLogsOptions {
   filterByTraceID?: boolean;
   filterBySpanID?: boolean;
   lokiSearch?: boolean; // legacy
+  query?: string;
+  customQuery?: boolean;
 }
 
 export interface TraceToLogsOptionsV2 {
@@ -61,7 +63,34 @@ export function getTraceToLogsOptions(data?: TraceToLogsData): TraceToLogsOption
     return undefined;
   }
   const traceToLogs: TraceToLogsOptionsV2 = {
-    customQuery: false,
+    query: data.tracesToLogs.query,
+    customQuery: data.tracesToLogs.customQuery ?? Boolean(data.tracesToLogs.query),
+  };
+  traceToLogs.datasourceUid = data.tracesToLogs.datasourceUid;
+  traceToLogs.tags = data.tracesToLogs.mapTagNamesEnabled
+    ? data.tracesToLogs.mappedTags
+    : data.tracesToLogs.tags?.map((tag) => ({ key: tag }));
+  traceToLogs.filterByTraceID = data.tracesToLogs.filterByTraceID;
+  traceToLogs.filterBySpanID = data.tracesToLogs.filterBySpanID;
+  traceToLogs.spanStartTimeShift = data.tracesToLogs.spanStartTimeShift;
+  traceToLogs.spanEndTimeShift = data.tracesToLogs.spanEndTimeShift;
+  return traceToLogs;
+}
+
+/**
+ * Gets new version of the traceToLogs config from the json data either returning directly or transforming the old
+ * version to new and returning that.
+ */
+export function getTraceToLogsOptions(data?: TraceToLogsData): TraceToLogsOptionsV2 | undefined {
+  if (data?.tracesToLogsV2) {
+    return data.tracesToLogsV2;
+  }
+  if (!data?.tracesToLogs) {
+    return undefined;
+  }
+  const traceToLogs: TraceToLogsOptionsV2 = {
+    query: data.tracesToLogs.query,
+    customQuery: data.tracesToLogs.customQuery ?? Boolean(data.tracesToLogs.query),
   };
   traceToLogs.datasourceUid = data.tracesToLogs.datasourceUid;
   traceToLogs.tags = data.tracesToLogs.mapTagNamesEnabled
