@@ -1,0 +1,29 @@
+name: ORQELON Grafana 133397 Signed First-Red
+
+on:
+  push:
+    branches:
+      - evidence/133397-signed-first-red
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  first-red:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install locked dependencies
+        run: yarn install --immutable
+      - name: Run signed First-Red test
+        run: yarn jest packages/grafana-o11y-ds-frontend/src/TraceToLogs/TraceToLogsSettings.test.tsx --runInBand
