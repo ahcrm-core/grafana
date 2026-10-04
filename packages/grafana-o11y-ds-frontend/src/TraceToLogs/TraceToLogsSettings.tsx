@@ -20,88 +20,7 @@ export interface TraceToLogsTag {
   value?: string;
 }
 
-// @deprecated use getTraceToLogsOptions to get the v2 version of this config from jsonData
-export interface TraceToLogsOptions {
-  datasourceUid?: string;
-  tags?: string[];
-  mappedTags?: TraceToLogsTag[];
-  mapTagNamesEnabled?: boolean;
-  spanStartTimeShift?: string;
-  spanEndTimeShift?: string;
-  filterByTraceID?: boolean;
-  filterBySpanID?: boolean;
-  lokiSearch?: boolean; // legacy
-  query?: string;
-  customQuery?: boolean;
-}
-
-export interface TraceToLogsOptionsV2 {
-  datasourceUid?: string;
-  tags?: TraceToLogsTag[];
-  spanStartTimeShift?: string;
-  spanEndTimeShift?: string;
-  filterByTraceID?: boolean;
-  filterBySpanID?: boolean;
-  query?: string;
-  customQuery: boolean;
-}
-
-export interface TraceToLogsData extends DataSourceJsonData {
-  tracesToLogs?: TraceToLogsOptions;
-  tracesToLogsV2?: TraceToLogsOptionsV2;
-}
-
-/**
- * Gets new version of the traceToLogs config from the json data either returning directly or transforming the old
- * version to new and returning that.
- */
-export function getTraceToLogsOptions(data?: TraceToLogsData): TraceToLogsOptionsV2 | undefined {
-  if (data?.tracesToLogsV2) {
-    return data.tracesToLogsV2;
-  }
-  if (!data?.tracesToLogs) {
-    return undefined;
-  }
-  const traceToLogs: TraceToLogsOptionsV2 = {
-    query: data.tracesToLogs.query,
-    customQuery: data.tracesToLogs.customQuery ?? Boolean(data.tracesToLogs.query),
-  };
-  traceToLogs.datasourceUid = data.tracesToLogs.datasourceUid;
-  traceToLogs.tags = data.tracesToLogs.mapTagNamesEnabled
-    ? data.tracesToLogs.mappedTags
-    : data.tracesToLogs.tags?.map((tag) => ({ key: tag }));
-  traceToLogs.filterByTraceID = data.tracesToLogs.filterByTraceID;
-  traceToLogs.filterBySpanID = data.tracesToLogs.filterBySpanID;
-  traceToLogs.spanStartTimeShift = data.tracesToLogs.spanStartTimeShift;
-  traceToLogs.spanEndTimeShift = data.tracesToLogs.spanEndTimeShift;
-  return traceToLogs;
-}
-
-/**
- * Gets new version of the traceToLogs config from the json data either returning directly or transforming the old
- * version to new and returning that.
- */
-export function getTraceToLogsOptions(data?: TraceToLogsData): TraceToLogsOptionsV2 | undefined {
-  if (data?.tracesToLogsV2) {
-    return data.tracesToLogsV2;
-  }
-  if (!data?.tracesToLogs) {
-    return undefined;
-  }
-  const traceToLogs: TraceToLogsOptionsV2 = {
-    query: data.tracesToLogs.query,
-    customQuery: data.tracesToLogs.customQuery ?? Boolean(data.tracesToLogs.query),
-  };
-  traceToLogs.datasourceUid = data.tracesToLogs.datasourceUid;
-  traceToLogs.tags = data.tracesToLogs.mapTagNamesEnabled
-    ? data.tracesToLogs.mappedTags
-    : data.tracesToLogs.tags?.map((tag) => ({ key: tag }));
-  traceToLogs.filterByTraceID = data.tracesToLogs.filterByTraceID;
-  traceToLogs.filterBySpanID = data.tracesToLogs.filterBySpanID;
-  traceToLogs.spanStartTimeShift = data.tracesToLogs.spanStartTimeShift;
-  traceToLogs.spanEndTimeShift = data.tracesToLogs.spanEndTimeShift;
-  return traceToLogs;
-}
+fix(trace-to-logs): preserve legacy custom query migration}
 
 interface Props extends DataSourcePluginOptionsEditorProps<TraceToLogsData> {}
 
@@ -158,31 +77,7 @@ export function TraceToLogsSettings({ options, onOptionsChange }: Props) {
             onChange={(ds: DataSourceInstanceSettings) =>
               updateTracesToLogs({
                 datasourceUid: ds.uid,
-              })
-            }
-            onClear={() => updateTracesToLogs({ datasourceUid: undefined })}
-          />
-        </InlineField>
-      </InlineFieldRow>
-
-      <InlineFieldRow>
-        <IntervalInput
-          label={getTimeShiftLabel('start')}
-          tooltip={getTimeShiftTooltip('start', '0')}
-          value={traceToLogs.spanStartTimeShift || ''}
-          onChange={(val) => {
-            updateTracesToLogs({ spanStartTimeShift: val });
-          }}
-          isInvalidError={invalidTimeShiftError}
-        />
-      </InlineFieldRow>
-
-      <InlineFieldRow>
-        <IntervalInput
-          label={getTimeShiftLabel('end')}
-          tooltip={getTimeShiftTooltip('end', '0')}
-          value={traceToLogs.spanEndTimeShift || ''}
-          onChange={(val) => {
+        
             updateTracesToLogs({ spanEndTimeShift: val });
           }}
           isInvalidError={invalidTimeShiftError}
